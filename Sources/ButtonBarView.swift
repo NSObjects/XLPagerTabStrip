@@ -40,14 +40,19 @@ public enum SelectedBarAlignment {
 public class ButtonBarView: UICollectionView {
     
     public lazy var selectedBar: UIView = { [unowned self] in
-        let bar  = UIView(frame: CGRectMake(0, self.frame.size.height - CGFloat(self.selectedBarHeight), 0, CGFloat(self.selectedBarHeight)))
+        let bar  = UIView(frame: CGRectMake(0, self.frame.size.height - CGFloat(self.selectedBarHeight), self.selectedBarWidth, CGFloat(self.selectedBarHeight)))
         bar.layer.zPosition = 9999
         return bar
-    }()
+        }()
     
     internal var selectedBarHeight: CGFloat = 4 {
         didSet {
             self.updateSlectedBarYPosition()
+        }
+    }
+    internal var selectedBarWidth: CGFloat = 0 {
+        didSet {
+            self.updateSlectedBarXPosition()
         }
     }
     var selectedBarAlignment: SelectedBarAlignment = .Center
@@ -95,7 +100,10 @@ public class ButtonBarView: UICollectionView {
         targetFrame.size.width += (toFrame.size.width - fromFrame.size.width) * progressPercentage
         targetFrame.origin.x += (toFrame.origin.x - fromFrame.origin.x) * progressPercentage
         
-        selectedBar.frame = CGRectMake(targetFrame.origin.x, selectedBar.frame.origin.y, targetFrame.size.width, selectedBar.frame.size.height)
+        let originX = selectedBarWidth > 0 ? targetFrame.origin.x + (targetFrame.size.width / 2) - (selectedBarWidth / 2) : targetFrame.origin.x
+        let width = selectedBarWidth > 0 ? selectedBarWidth : targetFrame.size.width
+        
+        selectedBar.frame = CGRectMake(originX, selectedBar.frame.origin.y, width, selectedBar.frame.size.height)
         
         var targetContentOffset: CGFloat = 0.0
         if contentSize.width > frame.size.width {
@@ -117,14 +125,15 @@ public class ButtonBarView: UICollectionView {
         let selectedCellFrame = attributes!.frame
         
         updateContentOffset(animated, pagerScroll: pagerScroll, toFrame: selectedCellFrame, toIndex: selectedCellIndexPath.row)
+        let originX = selectedBarWidth > 0 ? selectedCellFrame.origin.x + (selectedCellFrame.size.width / 2) - (selectedBarFrame.size.width / 2) : selectedCellFrame.origin.x
         
-        selectedBarFrame.size.width = selectedCellFrame.size.width
-        selectedBarFrame.origin.x = selectedCellFrame.origin.x
+        selectedBarFrame.size.width = selectedBarFrame.size.width
+        selectedBarFrame.origin.x = originX
         
         if animated {
             UIView.animateWithDuration(0.3, animations: { [weak self] in
                 self?.selectedBar.frame = selectedBarFrame
-            })
+                })
         }
         else {
             selectedBar.frame = selectedBarFrame
@@ -169,6 +178,17 @@ public class ButtonBarView: UICollectionView {
         var selectedBarFrame = selectedBar.frame
         selectedBarFrame.origin.y = frame.size.height - selectedBarHeight
         selectedBarFrame.size.height = selectedBarHeight
+        selectedBar.frame = selectedBarFrame
+    }
+    
+    private func updateSlectedBarXPosition() {
+        guard selectedBarWidth > 0  else {
+            return
+        }
+        
+        var selectedBarFrame = selectedBar.frame
+        selectedBarFrame.origin.x = (frame.size.width) / 2 + (selectedBarWidth / 2)
+        selectedBarFrame.size.width = selectedBarWidth
         selectedBar.frame = selectedBarFrame
     }
 }

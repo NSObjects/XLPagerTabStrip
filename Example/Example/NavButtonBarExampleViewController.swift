@@ -32,6 +32,7 @@ class NavButtonBarExampleViewController: ButtonBarPagerTabStripViewController {
         // set up style before super view did load is executed
         settings.style.buttonBarBackgroundColor = .clearColor()
         settings.style.selectedBarBackgroundColor = .orangeColor()
+        //settings.style.selectedBarWidth = 14
         //-
         super.viewDidLoad()
         
